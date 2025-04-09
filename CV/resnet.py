@@ -222,10 +222,20 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
     print(f'Best validation accuracy: {best_val_acc:.2f}%')
     
     # Save training log
-    os.makedirs('results', exist_ok=True)
-    log_filename = f'results/resnet_training_log_fold_{fold}.json' if fold is not None else 'results/resnet_training_log.json'
+    os.makedirs('CV/results/resnet_plots', exist_ok=True)
+    log_filename = f'CV/results/resnet_plots/resnet_training_log_fold_{fold}.json' if fold is not None else 'CV/results/resnet_plots/resnet_training_log.json'
     with open(log_filename, 'w') as f:
         json.dump(training_log, f, indent=2)
+    
+    # Save loss and accuracy to text file
+    with open('CV/results/resnet_log.txt', 'a') as f:
+        f.write(f"\nFold {fold} Results:\n")
+        f.write(f"Best Validation Accuracy: {best_val_acc:.2f}%\n")
+        f.write("Training Losses: " + ", ".join([f"{loss:.4f}" for loss in train_losses]) + "\n")
+        f.write("Validation Losses: " + ", ".join([f"{loss:.4f}" for loss in val_losses]) + "\n")
+        f.write("Training Accuracies: " + ", ".join([f"{acc:.2f}%" for acc in train_accs]) + "\n")
+        f.write("Validation Accuracies: " + ", ".join([f"{acc:.2f}%" for acc in val_accs]) + "\n")
+        f.write("-" * 50 + "\n")
     
     return best_val_acc, train_losses, val_losses, train_accs, val_accs, class_accuracies
 
@@ -284,7 +294,7 @@ def evaluate_model(model, test_loader, device):
         "duration_seconds": test_time
     }
     
-    with open('results/resnet_test_results.json', 'w') as f:
+    with open('CV/results/resnet_plots/resnet_test_results.json', 'w') as f:
         json.dump(test_results, f, indent=2)
     
     # Plot and save confusion matrix
@@ -298,7 +308,7 @@ def evaluate_model(model, test_loader, device):
     plt.tight_layout()
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
-    plt.savefig('results/confusion_matrix.png')
+    plt.savefig('CV/results/resnet_plots/confusion_matrix.png')
     
     return accuracy, per_class_acc
 
@@ -308,10 +318,10 @@ def main():
     print(f"Using device: {device}")
     
     # Create necessary directories
-    os.makedirs('data/train', exist_ok=True)
-    os.makedirs('data/test', exist_ok=True)
-    os.makedirs('model_weights', exist_ok=True)
-    os.makedirs('results', exist_ok=True)
+    os.makedirs('CV/data/train', exist_ok=True)
+    os.makedirs('CV/data/test', exist_ok=True)
+    os.makedirs('CV/model_weights', exist_ok=True)
+    os.makedirs('CV/results', exist_ok=True)
     
     # Data transforms
     transform = transforms.Compose([
@@ -332,8 +342,8 @@ def main():
     
     # Create datasets
     print("Loading datasets...")
-    train_dataset = TongueDataset('data/train', transform=transform)
-    test_dataset = TongueDataset('data/test', transform=test_transform)
+    train_dataset = TongueDataset('CV/data/train', transform=transform)
+    test_dataset = TongueDataset('CV/data/test', transform=test_transform)
     
     # Create data loaders
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False, num_workers=4)
@@ -364,7 +374,7 @@ def main():
         }
     }
     
-    with open('results/training_config.json', 'w') as f:
+    with open('CV/results/resnet_plots/training_config.json', 'w') as f:
         json.dump(config, f, indent=2)
     
     # Get number of classes based on unique labels
@@ -427,7 +437,7 @@ def main():
         plt.legend()
         
         plt.tight_layout()
-        plt.savefig(f'results/fold_{fold+1}_plots.png')
+        plt.savefig(f'CV/results/resnet_plots/fold_{fold+1}_plots.png')
         plt.close()
     
     cv_time = time.time() - start_time
@@ -449,7 +459,7 @@ def main():
         "fold_class_accuracies": {f"fold_{i+1}": accs for i, accs in enumerate(fold_class_accuracies)}
     }
     
-    with open('results/cross_validation_results.json', 'w') as f:
+    with open('CV/results/resnet_plots/cross_validation_results.json', 'w') as f:
         json.dump(cv_results, f, indent=2)
     
     # Load best model and evaluate on test set
