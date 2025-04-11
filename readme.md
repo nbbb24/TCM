@@ -1,25 +1,22 @@
 # Tongue Coating Classification
 
-This project is focused on classifying tongue coating images using a Vision Transformer (ViT) model. The dataset consists of images labeled with different tongue coating types, and the model is trained to predict these labels.
+This project is focused on classifying tongue coating images using both Vision Transformer (ViT) and ResNet models. The dataset consists of images labeled with different tongue coating types, and the models are trained to predict these labels.
 
 ## Project Structure
 
-- **CV/Classification/**: Contains the main classification scripts and data.
-  - **vit.py**: The main script for training and testing the Vision Transformer model.
-  - **extract_label.py**: Utility script for extracting paths and labels from image filenames that saved as train/test/val text.
+- **CV/**: Contains the main classification scripts and data.
+  - **vit.py**: Script for training and testing the Vision Transformer model.
+  - **resnet.py**: Script for training and testing the ResNet model.
+  - **extract_label.py**: Utility script for extracting paths and labels from image filenames.
   - **find_label.py**: Script for finding and processing labels.
   - **combine_image.py**: Script for combining images, if applicable.
   - **class_label**: Contains the mapping of class labels to integers.
   - **requirements.txt**: Lists the Python dependencies required for the project.
   - **model_weights/**: Directory where trained model weights are saved.
   - **results/**: Directory where results such as plots are saved.
-  - **yolo_data/**: Contains the dataset.
+  - **data/**: Contains the dataset.
     - **images/**: Directory containing all images.
-      - **all/**: Subdirectory with all images used for training, validation, and testing.
     - **label/**: Contains text files with image paths and labels.
-      - **train.txt**: Training dataset labels.
-      - **val.txt**: Validation dataset labels.
-      - **test.txt**: Test dataset labels.
 
 ## Environment Setup
 
@@ -40,35 +37,56 @@ To create a conda environment for this project, follow these steps:
    pip install -r requirements.txt
    ```
 
-## Setup
-
-
-1. **Install Dependencies**: Ensure you have Python installed, then install the required packages using:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Prepare Data**: Ensure that your images are placed in the `yolo_data/images/all` directory and that labels are correctly extracted using `extract_label.py`.
-
-3. **Train the Model**: Run the `vit.py` script to train the model. The script will save the best model weights.
-
-4. **Evaluate the Model**: The script will also evaluate the model on the test set and print the accuracy.
-
 ## Usage
 
-- **Training**: Modify the hyperparameters and training settings in `vit.py` as needed, then execute the script to start training.
-- **Evaluation**: After training, the model can be evaluated using the test dataset to check its performance.
+### Data Preparation
+1. Place your images in the appropriate directory structure
+2. Use `extract_label.py` to process and extract labels from your images
+3. Ensure your data is properly organized in the `data/` directory
+
+### Model Training
+You can train either the Vision Transformer or ResNet model:
+
+1. **Vision Transformer (ViT)**:
+   ```bash
+   python CV/vit.py
+   ```
+
+2. **ResNet**:
+   ```bash
+   python CV/resnet.py
+   ```
+
+Both scripts will:
+- Train the model
+- Save the best model weights in the `model_weights/` directory
+- Generate training and validation plots in the `results/` directory
+- Evaluate the model on the test set
+
+## Model Selection
+
+The project provides two different approaches to tongue coating classification:
+
+1. **Vision Transformer (ViT)**: A transformer-based architecture that processes images as sequences of patches.
+2. **ResNet**: A deep convolutional neural network with residual connections.
+
+You can experiment with both models to determine which performs better for your specific use case.
+
+## Improving Model Performance
+
+To improve model accuracy, consider:
+
+- Experimenting with different data augmentation techniques
+- Adjusting hyperparameters such as learning rate and batch size
+- Using learning rate schedulers
+- Implementing cross-validation
+- Trying different model architectures or configurations
 
 ## Results
 
-- Training and validation loss plots are saved in the `results/` directory.
-- The best model weights are saved in the `model_weights/` directory.
-
-## Improving Accuracy
-
-- Experiment with different data augmentation techniques.
-- Adjust hyperparameters such as learning rate and batch size.
-- Consider using a learning rate scheduler for better convergence.
+- Training and validation metrics are saved in the `results/` directory
+- Model weights are saved in the `model_weights/` directory
+- Performance metrics are printed during training and evaluation
 
 ## License
 

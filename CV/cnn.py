@@ -6,14 +6,12 @@ from torchvision import transforms
 from PIL import Image
 import os
 import matplotlib.pyplot as plt
-from timm import create_model
 import numpy as np
 from sklearn.model_selection import KFold
-import shutil
-from tqdm import tqdm
-import requests
-from urllib3.exceptions import IncompleteRead
 import time
+from datetime import datetime
+import json
+from tqdm import tqdm
 
 class TongueDataset(Dataset):
     def __init__(self, image_dir, transform=None):
@@ -38,7 +36,7 @@ class TongueDataset(Dataset):
         
         print(f"Found {len(self.image_files)} images with {len(unique_labels)} unique labels")
         print("Label mapping:", self.label_to_idx)
-
+        
         # Count images per class
         class_counts = {}
         for label in self.labels:
@@ -47,8 +45,7 @@ class TongueDataset(Dataset):
                 class_counts[class_name] += 1
             else:
                 class_counts[class_name] = 1
-
-
+        
         print("Class distribution:")
         for class_name, count in class_counts.items():
             print(f"  {class_name}: {count} images ({count/len(self.image_files)*100:.1f}%)")
@@ -66,9 +63,37 @@ class TongueDataset(Dataset):
 
         return image, label
 
+class SimpleCNN(nn.Module):
+    def __init__(self, num_classes):
+        super(SimpleCNN, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
+        )
+        self.fc1 = nn.Linear(64 * 56 * 56, 512)  # 224/2/2 = 56
+        self.fc2 = nn.Linear(512, num_classes)
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc1(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
+
 def train_model(model, train_loader, val_loader, criterion, optimizer, num_epochs, device):
     # Create results directory if it doesn't exist
-    os.makedirs('CV/results/vit_plots', exist_ok=True)
+    os.makedirs('CV/results/cnn_plots', exist_ok=True)
     
     best_val_acc = 0.0
     train_losses = []
@@ -77,7 +102,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
     val_accuracies = []
     
     # Open log file
-    log_file = open('CV/results/vit_log.txt', 'w')
+    log_file = open('CV/results/cnn_log.txt', 'w')
     log_file.write('Epoch\tTrain Loss\tTrain Acc\tVal Loss\tVal Acc\n')
     
     for epoch in range(num_epochs):
@@ -85,7 +110,6 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         running_loss = 0.0
         correct = 0
         total = 0
-        batch_count = 0
         
         # Training phase with tqdm
         train_bar = tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs} [Train]')
@@ -102,7 +126,6 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-            batch_count += 1
             
             # Update progress bar
             train_bar.set_postfix({
@@ -122,7 +145,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         
         val_bar = tqdm(val_loader, desc=f'Epoch {epoch+1}/{num_epochs} [Val]')
         with torch.no_grad():
-            for images, labels in val_loader:
+            for images, labels in val_bar:
                 images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
                 loss = criterion(outputs, labels)
@@ -154,7 +177,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
         
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), 'model_weights/vit.pth')
+            torch.save(model.state_dict(), 'model_weights/cnn.pth')
             print(f'New best model saved with validation accuracy: {val_acc:.2f}%')
     
     # Print final training summary
@@ -194,7 +217,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, num_epoch
     plt.grid(True)
     
     plt.tight_layout()
-    plt.savefig('CV/results/vit_plots/training_curves.png')
+    plt.savefig('CV/results/cnn_plots/training_curves.png')
     plt.close()
     
     return best_val_acc, train_losses, val_losses, train_accuracies, val_accuracies
@@ -218,47 +241,6 @@ def evaluate_model(model, test_loader, device):
     
     accuracy = 100 * correct / total
     return accuracy
-
-def download_file_with_retry(url, destination, max_retries=3, chunk_size=8192):
-    """
-    Download a file with retry logic and progress bar.
-    
-    Args:
-        url (str): URL of the file to download
-        destination (str): Local path to save the file
-        max_retries (int): Maximum number of retry attempts
-        chunk_size (int): Size of chunks to download at a time
-    """
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, stream=True)
-            response.raise_for_status()
-            
-            total_size = int(response.headers.get('content-length', 0))
-            
-            with open(destination, 'wb') as f, tqdm(
-                desc=os.path.basename(destination),
-                total=total_size,
-                unit='iB',
-                unit_scale=True,
-                unit_divisor=1024,
-            ) as pbar:
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    if chunk:
-                        size = f.write(chunk)
-                        pbar.update(size)
-            
-            print(f"Successfully downloaded {destination}")
-            return True
-            
-        except (requests.exceptions.RequestException, IncompleteRead) as e:
-            print(f"Attempt {attempt + 1} failed: {str(e)}")
-            if attempt < max_retries - 1:
-                print(f"Retrying in 5 seconds...")
-                time.sleep(5)
-            else:
-                print(f"Failed to download after {max_retries} attempts")
-                return False
 
 def main():
     # Set device
@@ -294,7 +276,7 @@ def main():
     
     # Create model with number of classes based on unique labels
     num_classes = len(train_dataset.label_to_idx)
-    model = create_model('vit_base_patch16_224', pretrained=True, num_classes=num_classes)
+    model = SimpleCNN(num_classes)
     model = model.to(device)
     
     # Loss function and optimizer
@@ -326,9 +308,9 @@ def main():
     print(f'Average accuracy: {np.mean(fold_results):.2f}% ± {np.std(fold_results):.2f}%')
     
     # Load best model and evaluate on test set
-    model.load_state_dict(torch.load('model_weights/vit.pth'))
+    model.load_state_dict(torch.load('model_weights/cnn.pth'))
     test_accuracy = evaluate_model(model, test_loader, device)
     print(f'\nTest set accuracy: {test_accuracy:.2f}%')
 
 if __name__ == '__main__':
-    main()
+    main() 

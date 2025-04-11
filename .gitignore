@@ -1,5 +1,4 @@
-CV/model_weights/
+/model_weights/
 CV/data/
-CV/vit2.py
-CV/tcm_yolo_app/
+/data/
 
