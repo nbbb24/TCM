@@ -1,26 +1,38 @@
 # Tongue Coating Classification
 
-This project is focused on classifying tongue coating images using both Vision Transformer (ViT) and ResNet models. The dataset consists of images labeled with different tongue coating types, and the models are trained to predict these labels.
+This project is focused on classifying tongue coating images using Vision Transformer (ViT), ResNet, and CNN models. The dataset consists of images labeled with different tongue coating types, and the models are trained to predict these labels.
+
+## Data Source
+
+The dataset used in this project is sourced from the [YOLO Tongue Coating Dataset](https://github.com/jiangjiaqing/yolo_tongue_coating/tree/main/yolo_data/images). The dataset is organized into the following structure:
+
+```
+data/
+├── train/    # Training images
+└── test/     # Testing images
+```
 
 ## Project Structure
 
-- **CV/**: Contains the main classification scripts and data.
-  - **vit.py**: Script for training and testing the Vision Transformer model.
-  - **resnet.py**: Script for training and testing the ResNet model.
-  - **extract_label.py**: Utility script for extracting paths and labels from image filenames.
-  - **find_label.py**: Script for finding and processing labels.
-  - **combine_image.py**: Script for combining images, if applicable.
-  - **class_label**: Contains the mapping of class labels to integers.
-  - **requirements.txt**: Lists the Python dependencies required for the project.
-  - **model_weights/**: Directory where trained model weights are saved.
-  - **results/**: Directory where results such as plots are saved.
-  - **data/**: Contains the dataset.
-    - **images/**: Directory containing all images.
-    - **label/**: Contains text files with image paths and labels.
+```
+.
+├── CV/                      # Main classification scripts and utilities
+│   ├── vit.py              # Vision Transformer model implementation
+│   ├── resnet.py           # ResNet model implementation
+│   ├── cnn.py              # CNN model implementation
+│   ├── extract_label.py    # Utility for extracting paths and labels from image filenames
+│   ├── find_label.py       # Script for finding and processing labels
+│   ├── combine_image.py    # Script for combining images
+│   ├── class_label         # Mapping of class labels to integers
+│   ├── requirements.txt    # Python dependencies
+│   ├── results/            # Directory for training results and plots
+│   └── data/              # Dataset directory
+├── data/                   # Main data directory
+├── model_weights/          # Directory for trained model weights
+└── readme.md              # Project documentation
+```
 
 ## Environment Setup
-
-To create a conda environment for this project, follow these steps:
 
 1. **Create a Conda Environment**: Use the following command to create a new conda environment named `tcm` with Python 3.10:
    ```
@@ -37,15 +49,15 @@ To create a conda environment for this project, follow these steps:
    pip install -r requirements.txt
    ```
 
+4. **Setup Data**: 
+   - Navigate to the project directory
+   - Download the dataset from the provided source and rename it as data
+   - Ensure the data is properly organized in the `data/` directory
+
 ## Usage
 
-### Data Preparation
-1. Place your images in the appropriate directory structure
-2. Use `extract_label.py` to process and extract labels from your images
-3. Ensure your data is properly organized in the `data/` directory
-
 ### Model Training
-You can train either the Vision Transformer or ResNet model:
+You can train either the Vision Transformer, ResNet, or CNN model:
 
 1. **Vision Transformer (ViT)**:
    ```bash
@@ -57,7 +69,12 @@ You can train either the Vision Transformer or ResNet model:
    python CV/resnet.py
    ```
 
-Both scripts will:
+3. **CNN**:
+   ```bash
+   python CV/cnn.py
+   ```
+
+All scripts will:
 - Train the model
 - Save the best model weights in the `model_weights/` directory
 - Generate training and validation plots in the `results/` directory
@@ -65,12 +82,13 @@ Both scripts will:
 
 ## Model Selection
 
-The project provides two different approaches to tongue coating classification:
+The project provides three different approaches to tongue coating classification:
 
 1. **Vision Transformer (ViT)**: A transformer-based architecture that processes images as sequences of patches.
 2. **ResNet**: A deep convolutional neural network with residual connections.
+3. **CNN**: A convolutional neural network.
 
-You can experiment with both models to determine which performs better for your specific use case.
+You can experiment with all models to determine which performs better for your specific use case.
 
 ## Improving Model Performance
 
