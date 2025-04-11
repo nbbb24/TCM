@@ -26,7 +26,6 @@ data/
 │   ├── class_label         # Mapping of class labels to integers
 │   ├── requirements.txt    # Python dependencies
 │   ├── results/            # Directory for training results and plots
-│   └── data/              # Dataset directory
 ├── data/                   # Main data directory
 ├── model_weights/          # Directory for trained model weights
 └── readme.md              # Project documentation
