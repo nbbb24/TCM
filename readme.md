@@ -9,7 +9,7 @@ The dataset used in this project is sourced from the [YOLO Tongue Coating Datase
 ```
 data/
 ├── train/    # Training images
-└── test/     # Testing images
+└── val/     # Testing images
 ```
 
 ## Project Structure
@@ -52,6 +52,7 @@ data/
    - Navigate to the project directory
    - Download the dataset from the provided source and rename it as data
    - Ensure the data is properly organized in the `data/` directory
+   - Rename val folder as test
 
 ## Usage
 
