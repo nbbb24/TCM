@@ -8,7 +8,7 @@ from tqdm import tqdm
 from timm import create_model
 from torchvision.models import resnet50, ResNet50_Weights
 from cnn import SimpleCNN
-from CV.vit0 import TongueDataset
+from vit import TongueDataset
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
 import json

@@ -1,15 +1,138 @@
 
-ViT
+CNN
 --------------------------------------------------
-Accuracy: 99.80%
+Accuracy: 91.26%
 
 Confusion Matrix:
-[[112,   0,   0,   0,   0,   0],
- [  0,  59,   0,   0,   0,   1],
- [  0,   0,  85,   0,   0,   0],
- [  0,   0,   0,  19,   0,   0],
- [  0,   0,   0,   0,  70,   0],
- [  0,   0,   0,   0,   0, 146]]
+[[ 92,  11,   0,   0,   0,   2,   7],
+ [  1,  56,   0,   0,   0,   0,   3],
+ [  3,   0,  70,   1,   0,   4,   7],
+ [  0,   0,   0,  15,   0,   0,   4],
+ [  0,   0,   0,   0,  80,   0,   0],
+ [  1,   2,   0,   0,   0,  66,   1],
+ [  0,   0,   2,   0,   0,   1, 143]]
+
+Classification Report:
+Class 0:
+  precision: 0.9485
+  recall: 0.8214
+  f1-score: 0.8804
+  support: 112.0000
+Class 1:
+  precision: 0.8116
+  recall: 0.9333
+  f1-score: 0.8682
+  support: 60.0000
+Class 2:
+  precision: 0.9722
+  recall: 0.8235
+  f1-score: 0.8917
+  support: 85.0000
+Class 3:
+  precision: 0.9375
+  recall: 0.7895
+  f1-score: 0.8571
+  support: 19.0000
+Class 4:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 80.0000
+Class 5:
+  precision: 0.9041
+  recall: 0.9429
+  f1-score: 0.9231
+  support: 70.0000
+Class 6:
+  precision: 0.8667
+  recall: 0.9795
+  f1-score: 0.9196
+  support: 146.0000
+Class macro avg:
+  precision: 0.9201
+  recall: 0.8986
+  f1-score: 0.9057
+  support: 572.0000
+Class weighted avg:
+  precision: 0.9182
+  recall: 0.9126
+  f1-score: 0.9120
+  support: 572.0000
+
+
+ResNet
+--------------------------------------------------
+Accuracy: 99.65%
+
+Confusion Matrix:
+[[111,   1,   0,   0,   0,   0,   0],
+ [  0,  59,   0,   0,   0,   0,   1],
+ [  0,   0,  85,   0,   0,   0,   0],
+ [  0,   0,   0,  19,   0,   0,   0],
+ [  0,   0,   0,   0,  80,   0,   0],
+ [  0,   0,   0,   0,   0,  70,   0],
+ [  0,   0,   0,   0,   0,   0, 146]]
+
+Classification Report:
+Class 0:
+  precision: 1.0000
+  recall: 0.9911
+  f1-score: 0.9955
+  support: 112.0000
+Class 1:
+  precision: 0.9833
+  recall: 0.9833
+  f1-score: 0.9833
+  support: 60.0000
+Class 2:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 85.0000
+Class 3:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 19.0000
+Class 4:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 80.0000
+Class 5:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 70.0000
+Class 6:
+  precision: 0.9932
+  recall: 1.0000
+  f1-score: 0.9966
+  support: 146.0000
+Class macro avg:
+  precision: 0.9966
+  recall: 0.9963
+  f1-score: 0.9965
+  support: 572.0000
+Class weighted avg:
+  precision: 0.9965
+  recall: 0.9965
+  f1-score: 0.9965
+  support: 572.0000
+
+
+ViT
+--------------------------------------------------
+Accuracy: 99.83%
+
+Confusion Matrix:
+[[112,   0,   0,   0,   0,   0,   0],
+ [  0,  59,   0,   0,   0,   0,   1],
+ [  0,   0,  85,   0,   0,   0,   0],
+ [  0,   0,   0,  19,   0,   0,   0],
+ [  0,   0,   0,   0,  80,   0,   0],
+ [  0,   0,   0,   0,   0,  70,   0],
+ [  0,   0,   0,   0,   0,   0, 146]]
 
 Classification Report:
 Class 0:
@@ -36,20 +159,25 @@ Class 4:
   precision: 1.0000
   recall: 1.0000
   f1-score: 1.0000
-  support: 70.0000
+  support: 80.0000
 Class 5:
+  precision: 1.0000
+  recall: 1.0000
+  f1-score: 1.0000
+  support: 70.0000
+Class 6:
   precision: 0.9932
   recall: 1.0000
   f1-score: 0.9966
   support: 146.0000
 Class macro avg:
-  precision: 0.9989
-  recall: 0.9972
-  f1-score: 0.9980
-  support: 492.0000
+  precision: 0.9990
+  recall: 0.9976
+  f1-score: 0.9983
+  support: 572.0000
 Class weighted avg:
-  precision: 0.9980
-  recall: 0.9980
-  f1-score: 0.9980
-  support: 492.0000
+  precision: 0.9983
+  recall: 0.9983
+  f1-score: 0.9982
+  support: 572.0000
 

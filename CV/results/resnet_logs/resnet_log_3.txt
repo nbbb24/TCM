@@ -1,0 +1,27 @@
+Hyperparameters:
+learning_rate: 1e-05
+batch_size: 16
+num_epochs: 10
+k_folds: 5
+image_size: 224
+optimizer: AdamW
+loss_function: CrossEntropyLoss
+data_augmentation: True
+
+Training Progress:
+Epoch	Train Loss	Train Acc	Val Loss	Val Acc
+1	0.1141	96.97	0.0268	99.77
+2	0.0907	98.00	0.0221	99.77
+3	0.0814	97.89	0.0165	100.00
+4	0.0672	98.97	0.0224	99.32
+5	0.0668	98.34	0.0128	100.00
+6	0.0652	98.57	0.0113	100.00
+7	0.0587	98.80	0.0108	100.00
+8	0.0625	98.46	0.0131	100.00
+9	0.0520	98.74	0.0089	100.00
+10	0.0474	98.80	0.0093	100.00
+
+Final Summary:
+Best Validation Accuracy: 100.00%
+Final Training Accuracy: 98.80%
+Final Validation Accuracy: 100.00%
