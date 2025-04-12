@@ -4,7 +4,7 @@ from PIL import Image
 from timm import create_model
 import os
 from transformers import pipeline
-
+from transformers import AutoModelForCausalLM, AutoTokenizer
 # Class labels mapping
 class_labels = {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'purple tongue coating': 4, 'red tongue yellow fur thick greasy fur': 5}
 
@@ -21,30 +21,69 @@ def get_tcm_advice(tongue_condition):
     Returns:
         str: TCM advice and recommendations
     """
-    # Initialize the pipeline
-    pipe = pipeline("text-generation", model="Qwen/Qwen-7B-Chat", trust_remote_code=True)
-    
-    # Create a prompt for TCM advice
-    prompt = f"""As a Traditional Chinese Medicine practitioner, provide detailed advice for a patient with the following tongue condition: {tongue_condition}.
-    
-Please include:
-1. The TCM diagnosis and its meaning
-2. Possible underlying health issues
-3. Dietary recommendations
-4. Lifestyle suggestions
-5. Herbal medicine recommendations (if applicable)
-6. Acupressure points to focus on
+    try:
+        print("Creating prompt...")
+        # Create chat messages with system and user roles
 
-Format the response in a clear, professional manner suitable for a patient consultation."""
+        messages = [{"role": "system",
+                "content": """You are an expert Traditional Chinese Medicine (TCM) practitioner with extensive knowledge of tongue diagnosis and treatment.
+                Please provide a comprehensive TCM consultation that includes:
 
-    # Create messages for the pipeline
-    messages = [
-        {"role": "user", "content": prompt}
-    ]
-    
-    # Generate response
-    response = pipe(messages)
-    return response[0]['generated_text']
+1. TCM DIAGNOSIS
+- Explain the meaning of this tongue condition in TCM terms
+- Describe the underlying imbalances it indicates
+
+2. DIETARY RECOMMENDATIONS
+- Specific foods to include
+- Foods to avoid
+- Any dietary patterns to follow
+
+3. LIFESTYLE GUIDANCE
+- Daily habits to adopt
+- Activities to avoid
+- Stress management techniques
+Please provide your response in a clear, professional format suitable for a patient consultation. Use 1 sentence for each recommendation and split by line."""
+            },
+            {
+                "role": "user",
+                "content": f"""The type of tongue condition is {tongue_condition}"""}]
+
+
+        
+        # Set device
+        device = 0 if torch.cuda.is_available() else -1
+        print(f"Using {'GPU' if device == 0 else 'CPU'}")
+        
+        # Initialize pipeline with device configuration
+        pipe = pipeline(
+            "text-generation", 
+            model="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+            device=device,
+            torch_dtype=torch.float16 if device == 0 else torch.float32
+        )
+        
+        # Apply chat template and generate response
+        prompt = pipe.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        outputs = pipe(
+            prompt,
+            max_new_tokens=1000,
+            do_sample=True,
+            temperature=0.7,
+            top_k=50,
+            top_p=0.95
+        )
+        
+        answer = outputs[0]["generated_text"]
+        
+        if not answer:
+            print("Warning: Empty response received")
+            return "I apologize, but I'm having trouble generating a response at the moment. Please try again."
+            
+        return answer
+        
+    except Exception as e:
+        print(f"Error generating TCM advice: {str(e)}")
+        return f"An error occurred while generating TCM advice: {str(e)}"
 
 def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=6):
     """
@@ -100,11 +139,11 @@ if __name__ == "__main__":
         predicted_label, confidence, all_probs = predict_image(image_path)
         predicted_condition = label_to_name[predicted_label]
         print(f"\nPredicted condition: {predicted_condition}")
-        print(f"Confidence: {confidence:.4f}")
+        # print(f"Confidence: {confidence:.4f}")
         
-        print("\nProbabilities for each condition:")
-        for i, prob in enumerate(all_probs):
-            print(f"{label_to_name[i]}: {prob:.4f}")
+        # print("\nProbabilities for each condition:")
+        # for i, prob in enumerate(all_probs):
+        #     print(f"{label_to_name[i]}: {prob:.4f}")
         
         print("\nGenerating TCM advice...")
         tcm_advice = get_tcm_advice(predicted_condition)

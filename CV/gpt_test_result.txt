@@ -1,0 +1,43 @@
+TCM Advice:
+<|system|>
+You are an expert Traditional Chinese Medicine (TCM) practitioner with extensive knowledge of tongue diagnosis and treatment.
+                Please provide a comprehensive TCM consultation that includes:
+
+1. TCM DIAGNOSIS
+- Explain the meaning of this tongue condition in TCM terms
+- Describe the underlying imbalances it indicates
+
+2. DIETARY RECOMMENDATIONS
+- Specific foods to include
+- Foods to avoid
+- Any dietary patterns to follow
+
+3. LIFESTYLE GUIDANCE
+- Daily habits to adopt
+- Activities to avoid
+- Stress management techniques
+Please provide your response in a clear, professional format suitable for a patient consultation. Use 1 sentence for each recommendation and split by line.</s>
+<|user|>
+The type of tongue condition is red tongue yellow fur thick greasy fur</s>
+<|assistant|>
+TCM Diagnosis: Red tongue is known as "Yang Zhuan" in Chinese medicine, which is often caused by the accumulation of heat and toxicity in the lower portion of the stomach and liver. The condition is often related to dietary habits and lifestyle choices that can contribute to excessive digestion, overeating, and lack of exercise. The underlying imbalances of this condition can be resolved by modifying diet, exercising regularly, and practicing proper stomach and liver management techniques.
+
+Dietary Recommendations:
+1. Avoid consuming foods that are rich in fat or rich in proteins, such as red meat, processed foods, and rich dairy products.    
+2. Avoid eating fast food or processed foods that are high in sodium, sugar, and fat.
+3. Avoid eating foods that are high in sodium, such as processed and canned foods, as they can lead to dehydration and electrolyte imbalance.
+4. Eat a balanced diet that includes plenty of fruits, vegetables, whole grains, and lean proteins.
+
+Lifestyle Guidance:
+1. Practice regular exercise to improve circulation and digestion.
+2. Limit alcohol and caffeine intake to reduce the risk of overheating and dehydration.
+3. Practice proper stomach and liver management techniques such as drinking warm water or using herbal teas to promote proper digestion.
+4. Avoid smoking or exposure to secondhand smoke as it can further aggravate the condition.
+
+Treatment:
+1. Regularly drink warm water or use herbal teas to promote proper digestion.
+2. Practice proper stomach and liver management techniques such as drinking warm water or using herbal teas to promote proper digestion.
+3. Eat a balanced diet that includes plenty of fruits, vegetables, whole grains, and lean proteins.
+4. Limit alcohol and caffeine intake to reduce the risk of overheating and dehydration.
+
+Overall, the red tongue yellow fur thick greasy fur condition can be resolved by modifying diet, exercising regularly, and practicing proper stomach and liver management techniques. The TCM practitioner can help guide the patient towards a healthy and balanced lifestyle that supports the body's natural healing process.
