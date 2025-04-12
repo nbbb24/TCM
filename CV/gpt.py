@@ -24,7 +24,6 @@ def get_tcm_advice(tongue_condition):
     try:
         print("Creating prompt...")
         # Create chat messages with system and user roles
-
         messages = [{"role": "system",
                 "content": """You are an expert Traditional Chinese Medicine (TCM) practitioner with extensive knowledge of tongue diagnosis and treatment.
                 Please provide a comprehensive TCM consultation that includes:
@@ -42,13 +41,12 @@ def get_tcm_advice(tongue_condition):
 - Daily habits to adopt
 - Activities to avoid
 - Stress management techniques
-Please provide your response in a clear, professional format suitable for a patient consultation. Use 1 sentence for each recommendation and split by line."""
+
+Please provide your response in a clear, professional format suitable for a patient consultation. Use no more than 3 sentences for each section. Focus on practical, actionable advice."""
             },
             {
                 "role": "user",
                 "content": f"""The type of tongue condition is {tongue_condition}"""}]
-
-
         
         # Set device
         device = 0 if torch.cuda.is_available() else -1
@@ -78,6 +76,28 @@ Please provide your response in a clear, professional format suitable for a pati
         if not answer:
             print("Warning: Empty response received")
             return "I apologize, but I'm having trouble generating a response at the moment. Please try again."
+        
+        # Extract only the assistant's response
+        assistant_start = answer.find("<|assistant|>")
+        if assistant_start != -1:
+            assistant_content = answer[assistant_start + len("<|assistant|>"):].strip()
+            # Remove any remaining tags
+            assistant_content = assistant_content.replace("<|system|>", "").replace("<|user|>", "").replace("</s>", "")
+            
+            # Save to file
+            os.makedirs("CV/tinyllama", exist_ok=True)
+            base_filename = "CV/tinyllama/tinyllama_output"
+            counter = 1
+            filename = f"{base_filename}.txt"
+            
+            while os.path.exists(filename):
+                filename = f"{base_filename}_{counter}.txt"
+                counter += 1
+                
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(assistant_content)
+            
+            return assistant_content.strip()
             
         return answer
         

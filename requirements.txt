@@ -1,12 +1,12 @@
-torch>=1.9.0
-torchvision>=0.10.0
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
 Pillow>=8.0.0
 timm>=0.5.4
-numpy>=1.19.0 
-transformers
-matplotlib
-scikit-learn
-scipy
-pandas
-seaborn
+numpy>=1.19.0
+transformers>=4.37.0
+matplotlib>=3.5.0
+scikit-learn>=1.0.0
+scipy>=1.7.0
+pandas>=1.3.0
+seaborn>=0.11.0
 
