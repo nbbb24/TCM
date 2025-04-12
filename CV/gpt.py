@@ -6,14 +6,7 @@ import os
 from transformers import pipeline
 
 # Class labels mapping
-class_labels = {
-    'The_white_tongue_is_thick_and_greasy': 0, 
-    'red_tongue_yellow_fur_thick_greasy_fur': 1, 
-    'The_red_tongue_is_thick_and_greasy': 2, 
-    'black_tongue_coating': 3, 
-    'map_tongue_coating_': 4, 
-    'purple_tongue_coating': 5
-}
+class_labels = {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'purple tongue coating': 4, 'red tongue yellow fur thick greasy fur': 5}
 
 # Reverse the mapping for easy lookup
 label_to_name = {v: k for k, v in class_labels.items()}
@@ -29,7 +22,7 @@ def get_tcm_advice(tongue_condition):
         str: TCM advice and recommendations
     """
     # Initialize the pipeline
-    pipe = pipeline("image-text-to-text", model="meta-llama/Llama-4-Scout-17B-16E-Instruct")
+    pipe = pipeline("text-generation", model="Qwen/Qwen-7B-Chat", trust_remote_code=True)
     
     # Create a prompt for TCM advice
     prompt = f"""As a Traditional Chinese Medicine practitioner, provide detailed advice for a patient with the following tongue condition: {tongue_condition}.
@@ -53,7 +46,7 @@ Format the response in a clear, professional manner suitable for a patient consu
     response = pipe(messages)
     return response[0]['generated_text']
 
-def predict_image(image_path, model_path='vit.pth', num_classes=6):
+def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=6):
     """
     Predict the label of a single image using a trained Vision Transformer model.
     
@@ -77,7 +70,7 @@ def predict_image(image_path, model_path='vit.pth', num_classes=6):
     
     try:
         image = Image.open(image_path).convert('RGB')
-        image_tensor = transform(image).unsqueeze(0).to(device)
+        image_tensor = transform(image).unsqueeze(0).to(device)  # Add batch dimension
     except Exception as e:
         raise ValueError(f"Error loading image: {str(e)}")
     
@@ -101,7 +94,7 @@ def predict_image(image_path, model_path='vit.pth', num_classes=6):
 
 # Example usage
 if __name__ == "__main__":
-    image_path = "data/val/red tongue yellow fur thick greasy fur_169.jpg"
+    image_path = "data/test/red tongue yellow fur thick greasy fur_169.jpg"
     try:
         print("Image path:", image_path)
         predicted_label, confidence, all_probs = predict_image(image_path)
