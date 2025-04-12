@@ -1,1 +1,1 @@
-    class_labels = {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'purple tongue coating': 4, 'red tongue yellow fur thick greasy fur': 5}
+class_labels =  {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'normal_class': 4, 'purple tongue coating': 5, 'red tongue yellow fur thick greasy fur': 6}
