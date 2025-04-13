@@ -38,7 +38,7 @@ def get_tcm_advice(tongue_condition):
         messages = [{"role": "system",
                 "content": """You are an expert Traditional Chinese Medicine (TCM) practitioner with extensive knowledge of tongue diagnosis and treatment.
 
-Please provide a comprehensive TCM consultation for the following tongue condition, divided into three sections. Each section must include exactly **twobullet points**, written in clear and professional language for patients.
+Please provide a comprehensive TCM consultation for the following tongue condition, divided into three sections. Each section must include exactly 3 bullet points, written in clear and professional language for patients.
 Keep each bullet concise and focused on practical, actionable advice suitable for patients and do not repeat the headings in your answer.
 
 Format your output as follows:
