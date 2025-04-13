@@ -7,6 +7,18 @@ from transformers import pipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer
 # Class labels mapping
 class_labels =  {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'normal_class': 4, 'purple tongue coating': 5, 'red tongue yellow fur thick greasy fur': 6}
+# Mapping from original class names to human-friendly names
+friendly_names = {
+    'The red tongue is thick and greasy': "Red tongue with thick, greasy coating",
+    'The white tongue is thick and greasy': "White tongue with thick, greasy coating",
+    'black tongue coating': "Black tongue coating",
+    'map tongue coating_': "Geographic tongue (map-like coating)",
+    'normal_class': "Normal healthy tongue",
+    'purple tongue coating': "Purple tongue coating",
+    'red tongue yellow fur thick greasy fur': "Red tongue with yellow, thick, greasy coating"
+}
+
+
 # Reverse the mapping for easy lookup
 label_to_name = {v: k for k, v in class_labels.items()}
 
@@ -25,23 +37,24 @@ def get_tcm_advice(tongue_condition):
         # Create chat messages with system and user roles
         messages = [{"role": "system",
                 "content": """You are an expert Traditional Chinese Medicine (TCM) practitioner with extensive knowledge of tongue diagnosis and treatment.
-                Please provide a comprehensive TCM consultation that includes:
 
-1. TCM DIAGNOSIS
-- Explain the meaning of this tongue condition in TCM terms
-- Describe the underlying imbalances it indicates
+Please provide a comprehensive TCM consultation for the following tongue condition, divided into three sections. Each section must include exactly **twobullet points**, written in clear and professional language for patients.
+Keep each bullet concise and focused on practical, actionable advice suitable for patients and do not repeat the headings in your answer.
 
-2. DIETARY RECOMMENDATIONS
-- Specific foods to include
-- Foods to avoid
-- Any dietary patterns to follow
+Format your output as follows:
 
-3. LIFESTYLE GUIDANCE
-- Daily habits to adopt
-- Activities to avoid
-- Stress management techniques
+### TCM Diagnosis
+- describing possible internal imbalances or organ dysfunctions
+- listing common accompanying symptoms or patterns
 
-Please provide your response in a clear, professional format suitable for a patient consultation. Use no more than 3 sentences for each section. Focus on practical, actionable advice."""
+### Dietary Recommendations
+- foods or substances to avoid
+- any dietary habits or patterns to follow
+
+### Lifestyle Guidance
+- beneficial daily routines or habits
+- activities or environments to avoid
+"""
             },
             {
                 "role": "user",
@@ -104,7 +117,7 @@ Please provide your response in a clear, professional format suitable for a pati
         print(f"Error generating TCM advice: {str(e)}")
         return f"An error occurred while generating TCM advice: {str(e)}"
 
-def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=6):
+def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=7):
     """
     Predict the label of a single image using a trained Vision Transformer model.
     
@@ -156,7 +169,8 @@ if __name__ == "__main__":
     try:
         print("Image path:", image_path)
         predicted_label, confidence, all_probs = predict_image(image_path)
-        predicted_condition = label_to_name[predicted_label]
+        predicted_condition_raw = label_to_name[predicted_label]
+        predicted_condition = friendly_names[predicted_condition_raw]
         print(f"\nPredicted condition: {predicted_condition}")
         # print(f"Confidence: {confidence:.4f}")
         
