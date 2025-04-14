@@ -1,6 +1,6 @@
 # Tongue Coating Classification
 
-This project is focused on classifying tongue coating images using Vision Transformer (ViT), ResNet, and CNN models. The dataset consists of images labeled with different tongue coating types, and the models are trained to predict these labels.
+This project is focused on classifying tongue coating images using Vision Transformer (ViT), ResNet, and CNN models, with additional capabilities for GPT-based analysis and a web interface. The dataset consists of images labeled with different tongue coating types, and the models are trained to predict these labels.
 
 ## Data Source
 
@@ -9,7 +9,7 @@ The dataset used in this project is sourced from the [YOLO Tongue Coating Datase
 ```
 data/
 ├── train/    # Training images
-└── val/     # Testing images
+└── test/     # Testing images
 ```
 
 ## Project Structure
@@ -20,14 +20,21 @@ data/
 │   ├── vit.py              # Vision Transformer model implementation
 │   ├── resnet.py           # ResNet model implementation
 │   ├── cnn.py              # CNN model implementation
-│   ├── extract_label.py    # Utility for extracting paths and labels from image filenames
+│   ├── gpt.py              # GPT-based analysis implementation
+│   ├── frontend_TCM.py     # Web interface implementation
+│   ├── evaluate.py         # Model evaluation script
+│   ├── utils.py            # Utility functions
+│   ├── normal_class.py     # Normal class classification
+│   ├── dataset_description.py # Dataset information
+│   ├── extract_label.py    # Utility for extracting paths and labels
 │   ├── find_label.py       # Script for finding and processing labels
 │   ├── combine_image.py    # Script for combining images
 │   ├── class_label         # Mapping of class labels to integers
-│   ├── requirements.txt    # Python dependencies
+│   ├── tinyllama/          # TinyLlama model implementation
 │   ├── results/            # Directory for training results and plots
 ├── data/                   # Main data directory
 ├── model_weights/          # Directory for trained model weights
+├── requirements.txt        # Python dependencies
 └── readme.md              # Project documentation
 ```
 
@@ -56,8 +63,8 @@ data/
 
 ## Usage
 
-### Model Training
-You can train either the Vision Transformer, ResNet, or CNN model:
+### Model Training and Evaluation
+You can train and evaluate different models:
 
 1. **Vision Transformer (ViT)**:
    ```bash
@@ -74,21 +81,53 @@ You can train either the Vision Transformer, ResNet, or CNN model:
    python CV/cnn.py
    ```
 
-All scripts will:
-- Train the model
-- Save the best model weights in the `model_weights/` directory
-- Generate training and validation plots in the `results/` directory
-- Evaluate the model on the test set
+4. **Model Evaluation**:
+   ```bash
+   python CV/evaluate.py
+   ```
+
+### Web Interface
+To run the web interface:
+```bash
+python CV/frontend_TCM.py
+```
+
+### GPT Analysis
+To perform GPT-based analysis:
+```bash
+python CV/gpt.py
+```
+
+## Features
+
+1. **Traditional Models**:
+   - Vision Transformer (ViT)
+   - ResNet
+   - CNN
+
+2. **Advanced Analysis**:
+   - GPT-based analysis
+   - TinyLlama integration
+   - Web interface for easy interaction
+
+3. **Evaluation Tools**:
+   - Comprehensive model evaluation
+   - Performance metrics
+   - Visualization tools
 
 ## Model Selection
 
-The project provides three different approaches to tongue coating classification:
+The project provides multiple approaches to tongue coating classification:
 
-1. **Vision Transformer (ViT)**: A transformer-based architecture that processes images as sequences of patches.
-2. **ResNet**: A deep convolutional neural network with residual connections.
-3. **CNN**: A convolutional neural network.
+1. **Traditional Models**:
+   - Vision Transformer (ViT): A transformer-based architecture
+   - ResNet: A deep convolutional neural network with residual connections
+   - CNN: A convolutional neural network
 
-You can experiment with all models to determine which performs better for your specific use case.
+2. **Advanced Analysis**:
+   - GPT-based analysis for detailed insights
+   - TinyLlama for efficient processing
+   - Web interface for user-friendly interaction
 
 ## Improving Model Performance
 
@@ -99,12 +138,14 @@ To improve model accuracy, consider:
 - Using learning rate schedulers
 - Implementing cross-validation
 - Trying different model architectures or configurations
+- Leveraging GPT analysis for additional insights
 
 ## Results
 
 - Training and validation metrics are saved in the `results/` directory
 - Model weights are saved in the `model_weights/` directory
 - Performance metrics are printed during training and evaluation
+- GPT analysis results are available in `gpt_test_result.txt`
 
 ## License
 

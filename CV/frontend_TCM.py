@@ -2,7 +2,15 @@ import streamlit as st
 import os
 from PIL import Image
 import tempfile
+import torch
+import time
+import gc
+import atexit
 from gpt import predict_image, get_tcm_advice, friendly_names, class_labels
+
+# Initialize PyTorch before Streamlit
+if not torch.cuda.is_available():
+    torch.set_num_threads(1)
 
 # Set page config
 st.set_page_config(
@@ -45,6 +53,63 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Global list to track temporary files
+temp_files = []
+
+def cleanup_temp_files():
+    """Clean up all temporary files at program exit."""
+    for file_path in temp_files:
+        try:
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+        except Exception:
+            pass  # Ignore errors during cleanup
+
+# Register cleanup function
+atexit.register(cleanup_temp_files)
+
+def create_temp_file(image):
+    """Create a temporary file and ensure it's properly closed."""
+    try:
+        # Create a temporary file with a unique name
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"tongue_image_{int(time.time())}.jpg")
+        
+        # Save the image and ensure it's closed
+        with open(temp_path, 'wb') as f:
+            image.save(f, format='JPEG')
+        
+        # Add to global list for cleanup
+        temp_files.append(temp_path)
+        return temp_path
+    except Exception as e:
+        st.error(f"Error creating temporary file: {str(e)}")
+        return None
+
+def cleanup_temp_file(file_path):
+    """Helper function to clean up temporary files with retries and garbage collection."""
+    if file_path in temp_files:
+        temp_files.remove(file_path)
+    
+    max_retries = 3
+    retry_delay = 2  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            # Force garbage collection
+            gc.collect()
+            time.sleep(retry_delay)
+            
+            if os.path.exists(file_path):
+                os.unlink(file_path)
+                return True
+        except Exception as e:
+            if attempt == max_retries - 1:
+                st.warning(f"Warning: Could not clean up temporary file after {max_retries} attempts: {str(e)}")
+                return False
+            time.sleep(retry_delay)
+    return False
+
 # Title and description
 st.title("Traditional Chinese Medicine Tongue Diagnosis")
 st.markdown("""
@@ -69,17 +134,17 @@ with col1:
         image = Image.open(uploaded_file)
         st.image(image, caption="Uploaded Tongue Image", use_container_width=True)
         
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
-            image.save(tmp_file.name)
-            
+        # Create temporary file
+        tmp_path = create_temp_file(image)
+        
+        if tmp_path:
             # Add predict button
             if st.button("Analyze Tongue and Generate TCM Advice", type="primary"):
                 try:
                     # Make prediction
                     with st.spinner("Analyzing tongue condition..."):
                         try:
-                            predicted_label, confidence, all_probs = predict_image(tmp_file.name)
+                            predicted_label, confidence, all_probs = predict_image(tmp_path)
                             # Get the original class name from the label
                             original_class = next((k for k, v in class_labels.items() if v == predicted_label), None)
                             if original_class is None:
@@ -143,11 +208,8 @@ with col1:
                     st.markdown('</div>', unsafe_allow_html=True)
                 
                 finally:
-                    # Clean up temporary file
-                    try:
-                        os.unlink(tmp_file.name)
-                    except Exception as e:
-                        st.warning(f"Warning: Could not clean up temporary file: {str(e)}")
+                    # Clean up temporary file using the helper function
+                    cleanup_temp_file(tmp_path)
     else:
         st.info("Please upload a tongue image to begin analysis.")
 
