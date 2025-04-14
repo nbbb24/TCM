@@ -5,6 +5,11 @@ from timm import create_model
 import os
 from transformers import pipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import platform
+
+# Check if running on Apple Silicon
+IS_MAC_M1 = platform.processor() == 'arm' and platform.system() == 'Darwin'
+
 # Class labels mapping
 class_labels =  {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'normal_class': 4, 'purple tongue coating': 5, 'red tongue yellow fur thick greasy fur': 6}
 # Mapping from original class names to human-friendly names
@@ -17,7 +22,6 @@ friendly_names = {
     'purple tongue coating': "Purple tongue coating",
     'red tongue yellow fur thick greasy fur': "Red tongue with yellow, thick, greasy coating"
 }
-
 
 # Reverse the mapping for easy lookup
 label_to_name = {v: k for k, v in class_labels.items()}
@@ -60,16 +64,21 @@ Format your output as follows:
                 "role": "user",
                 "content": f"""The type of tongue condition is {tongue_condition}"""}]
         
-        # Set device
-        device = 0 if torch.cuda.is_available() else -1
-        print(f"Using {'GPU' if device == 0 else 'CPU'}")
+        # Set device based on platform
+        if IS_MAC_M1:
+            device = "mps"  # Metal Performance Shaders for Apple Silicon
+            print("Using Apple Silicon GPU (MPS)")
+        else:
+            device = 0 if torch.cuda.is_available() else -1
+            print(f"Using {'GPU' if device == 0 else 'CPU'}")
         
         # Initialize pipeline with device configuration
         pipe = pipeline(
             "text-generation", 
             model="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
             device=device,
-            torch_dtype=torch.float16 if device == 0 else torch.float32
+            torch_dtype=torch.float16 if device != -1 else torch.float32,
+            model_kwargs={"load_in_8bit": True} if IS_MAC_M1 else {}  # Use 8-bit quantization on M1
         )
         
         # Apply chat template and generate response
@@ -129,39 +138,57 @@ def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=7)
     Returns:
         tuple: (predicted_label, confidence_score, all_probabilities)
     """
-    # Set device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
-    # Load and preprocess the image
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    
     try:
-        image = Image.open(image_path).convert('RGB')
-        image_tensor = transform(image).unsqueeze(0).to(device)  # Add batch dimension
+        # Set device based on platform
+        if IS_MAC_M1:
+            device = torch.device('mps')  # Metal Performance Shaders for Apple Silicon
+        else:
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Using device: {device}")
+        
+        # Load and preprocess the image
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        
+        try:
+            image = Image.open(image_path).convert('RGB')
+            image_tensor = transform(image).unsqueeze(0).to(device)  # Add batch dimension
+        except Exception as e:
+            raise ValueError(f"Error loading image: {str(e)}")
+        
+        # Load the model
+        model = create_model('vit_base_patch16_224', pretrained=False, num_classes=num_classes)
+        model = model.to(device)
+        
+        try:
+            model.load_state_dict(torch.load(model_path, map_location=device))
+        except Exception as e:
+            raise ValueError(f"Error loading model weights: {str(e)}")
+        
+        # Make prediction
+        model.eval()
+        with torch.no_grad():
+            outputs = model(image_tensor)
+            probabilities = torch.softmax(outputs, dim=1)
+            confidence, predicted = torch.max(probabilities, 1)
+            
+            # Convert to Python types
+            predicted_label = predicted.item()
+            confidence_score = confidence.item()
+            all_probabilities = probabilities[0].tolist()
+            
+            # Verify the predicted label is valid
+            if predicted_label not in class_labels.values():
+                raise ValueError(f"Invalid predicted label: {predicted_label}")
+            
+            return predicted_label, confidence_score, all_probabilities
+            
     except Exception as e:
-        raise ValueError(f"Error loading image: {str(e)}")
-    
-    # Load the model
-    model = create_model('vit_base_patch16_224', pretrained=False, num_classes=num_classes)
-    model = model.to(device)
-    
-    try:
-        model.load_state_dict(torch.load(model_path, map_location=device))
-    except Exception as e:
-        raise ValueError(f"Error loading model weights: {str(e)}")
-    
-    # Make prediction
-    model.eval()
-    with torch.no_grad():
-        outputs = model(image_tensor)
-        probabilities = torch.softmax(outputs, dim=1)
-        confidence, predicted = torch.max(probabilities, 1)
-    
-    return predicted.item(), confidence.item(), probabilities[0].tolist()
+        print(f"Error in predict_image: {str(e)}")
+        raise
 
 # Example usage
 if __name__ == "__main__":
