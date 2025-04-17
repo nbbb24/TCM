@@ -8,7 +8,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import platform
 
 # Check if running on Apple Silicon
-IS_MAC_M1 = platform.processor() == 'arm' and platform.system() == 'Darwin'
+IS_MAC = platform.system() == 'Darwin' and platform.processor() in ['arm', 'arm64']
+USE_MPS = IS_MAC and torch.backends.mps.is_available() and torch.backends.mps.is_built()
 
 # Class labels mapping
 class_labels =  {'The red tongue is thick and greasy': 0, 'The white tongue is thick and greasy': 1, 'black tongue coating': 2, 'map tongue coating_': 3, 'normal_class': 4, 'purple tongue coating': 5, 'red tongue yellow fur thick greasy fur': 6}
@@ -65,8 +66,8 @@ Format your output as follows:
                 "content": f"""The type of tongue condition is {tongue_condition}"""}]
         
         # Set device based on platform
-        if IS_MAC_M1:
-            device = "mps"  # Metal Performance Shaders for Apple Silicon
+        if USE_MPS:
+            device = "mps"
             print("Using Apple Silicon GPU (MPS)")
         else:
             device = 0 if torch.cuda.is_available() else -1
@@ -78,7 +79,7 @@ Format your output as follows:
             model="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
             device=device,
             torch_dtype=torch.float16 if device != -1 else torch.float32,
-            model_kwargs={"load_in_8bit": True} if IS_MAC_M1 else {}  # Use 8-bit quantization on M1
+            model_kwargs={"load_in_8bit": True} if USE_MPS else {}  # Use 8-bit quantization on M1
         )
         
         # Apply chat template and generate response
@@ -140,8 +141,8 @@ def predict_image(image_path, model_path='model_weights/vit.pth', num_classes=7)
     """
     try:
         # Set device based on platform
-        if IS_MAC_M1:
-            device = torch.device('mps')  # Metal Performance Shaders for Apple Silicon
+        if USE_MPS:
+            device = torch.device('mps')
         else:
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f"Using device: {device}")
