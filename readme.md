@@ -18,9 +18,13 @@ data/
 .
 ├── CV/                      # Main classification scripts and utilities
 │   ├── vit.py              # Vision Transformer model implementation
+│   ├── vit0.py             # Original Vision Transformer implementation
 │   ├── resnet.py           # ResNet model implementation
+│   ├── resnet0.py          # Original ResNet implementation
 │   ├── cnn.py              # CNN model implementation
+│   ├── cnn0.py             # Original CNN implementation
 │   ├── gpt.py              # GPT-based analysis implementation
+│   ├── gpt_test_result.txt # Results from GPT analysis
 │   ├── frontend_TCM.py     # Web interface implementation
 │   ├── evaluate.py         # Model evaluation script
 │   ├── utils.py            # Utility functions
@@ -32,6 +36,7 @@ data/
 │   ├── class_label         # Mapping of class labels to integers
 │   ├── tinyllama/          # TinyLlama model implementation
 │   ├── results/            # Directory for training results and plots
+│   └── __pycache__/        # Python cache files
 ├── data/                   # Main data directory
 ├── model_weights/          # Directory for trained model weights
 ├── requirements.txt        # Python dependencies
@@ -60,6 +65,10 @@ data/
    - Download the dataset from the provided source and rename it as data
    - Ensure the data is properly organized in the `data/` directory
    - Rename val folder as test
+   - Run normal_class.py to download and set up the normal class data:
+     ```
+     python CV/normal_class.py
+     ```
 
 ## Usage
 
